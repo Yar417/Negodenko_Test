@@ -2,7 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import MaxValueValidator as MaxVV
 from django.core.validators import MinValueValidator as MinVV
-
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 # ---------- Книги ----------
 
@@ -35,9 +36,17 @@ class Users(models.Model):
     email = models.EmailField(max_length=100, unique=True)
     date_register = models.DateField(auto_now_add=True)
 
+
     def __str__(self):
         return f'User №{self.id}: {self.name} ({self.date_register})'
 
     class Meta:
         verbose_name = 'User'
         verbose_name_plural = 'Users'
+
+@receiver(post_save, sender=Users)
+def user_created(sender, instance, created, **kwargs):
+    if created:
+        # Здесь instance - это только что созданный экземпляр модели Book
+        message = f'Книга с именем {instance.email} была создана.'
+        print(message)
