@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Books, Users
 
 
-# ---------- Настройка Админки ----------
+# ---------- Настройка Панели администратора ----------
 class BooksAdmin(admin.ModelAdmin):
     search_fields = ['name', 'author', 'year', 'isbn']
     list_display = ['isbn', 'author', 'name', 'year']
@@ -16,5 +16,6 @@ class UsersAdmin(admin.ModelAdmin):
 
 
 # ---------- Регистрация Моделей ----------
+
 admin.site.register(Books, BooksAdmin)
 admin.site.register(Users, UsersAdmin)

@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator as MaxVV
 from django.core.validators import MinValueValidator as MinVV
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from . import tasks
 
 # ---------- Книги ----------
 
@@ -11,7 +12,6 @@ class Books(models.Model):
     name = models.CharField('Name', max_length=200, null=False)
     author = models.CharField('Author', max_length=200, null=True, blank=True)
     year = models.IntegerField('The year of publishing',
-                               default=timezone.now,
                                validators=[MinVV(0), MaxVV(3000)]
                                )
     # С 1 января 2007 года введён новый стандарт ISBN — 13-значный, ранее состоял из 9-ти
@@ -36,7 +36,6 @@ class Users(models.Model):
     email = models.EmailField(max_length=100, unique=True)
     date_register = models.DateField(auto_now_add=True)
 
-
     def __str__(self):
         return f'User №{self.id}: {self.name} ({self.date_register})'
 
@@ -44,9 +43,14 @@ class Users(models.Model):
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
+
 @receiver(post_save, sender=Users)
 def user_created(sender, instance, created, **kwargs):
+    '''
+    При регистрации новых пользователей через API
+    просходит ансинхронная отправка электронной почты
+    на адрес нового пользователя, как того требует задание.
+    '''
     if created:
-        # Здесь instance - это только что созданный экземпляр модели Book
-        message = f'Книга с именем {instance.email} была создана.'
-        print(message)
+        tasks.send_mail_new_user.delay(instance.email)
+
