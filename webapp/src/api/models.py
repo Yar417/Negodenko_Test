@@ -54,3 +54,9 @@ def user_created(sender, instance, created, **kwargs):
     if created:
         tasks.send_mail_new_user.delay(instance.email)
 
+'''
+Готово!
+Используя механизм ветвления в Git, создайте 
+отдельную ветку для исправления ошибки в коде вашего приложения. 
+Назовите ветку, например, bugfix/registration. 
+'''
